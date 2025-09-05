@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="shortcut icon" type="image/png" href="/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800;900&family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mount Summer Convent School</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx">
+
+      // JavaScript for newsletter form submission and welcome animation
+      document.querySelectorAll('.newsletter button, .newsletter-footer button').forEach(button => {
+          button.addEventListener('click', () => {
+              const nameInput = button.previousElementSibling.previousElementSibling;
+              const emailInput = button.previousElementSibling;
+              if (nameInput.value && emailInput.value) {
+                  alert('Thank you for signing up for the newsletter!');
+                  nameInput.value = '';
+                  emailInput.value = '';
+              } else {
+                  alert('Please fill in all fields.');
+              }
+          });
+      });
+
+      // Animation for Welcome Section
+      window.addEventListener('scroll', () => {
+          const welcome = document.querySelector('.welcome');
+          const welcomePosition = welcome.getBoundingClientRect().top;
+          const screenPosition = window.innerHeight / 1.3;
+
+          if (welcomePosition < screenPosition) {
+              welcome.classList.add('active');
+          }
+      });
+
+      // Animation for Perspectives Section
+      window.addEventListener('scroll', () => {
+          const perspectives = document.querySelectorAll('.perspectives-grid div');
+          const screenPosition = window.innerHeight / 1.3;
+
+          perspectives.forEach((card, index) => {
+              const cardPosition = card.getBoundingClientRect().top;
+              if (cardPosition < screenPosition) {
+                  setTimeout(() => {
+                      card.classList.add('active');
+                  }, index * 200);
+              }
+          });
+      });
+
+      // Testimonial Carousel
+      let currentSlide = 0;
+      const carousel = document.getElementById('testimonial-carousel');
+      const slides = carousel.children;
+      const totalSlides = slides.length;
+
+      function updateCarousel() {
+          carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+      }
+
+      function nextSlide() {
+          currentSlide = (currentSlide + 1) % totalSlides;
+          updateCarousel();
+      }
+
+      function prevSlide() {
+          currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+          updateCarousel();
+      }
+
+      // Auto-slide every 5 seconds
+      setInterval(nextSlide, 5000);
+    </script>
+  </body>
+</html>
