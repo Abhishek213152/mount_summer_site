@@ -4,7 +4,16 @@ import mountLogo from "../assets/mountlogo.png";
 import { Link } from "react-router-dom";
 import "./About.css";
 
+import { NEW_PICS_LIST } from "../data/galleryData";
+
 function About() {
+  const previewPics = [
+    NEW_PICS_LIST[0], // Birthday celebration
+    NEW_PICS_LIST[1], // Gandhi Jayanti monkeys
+    NEW_PICS_LIST[9], // 1st Rank Felicitation
+    NEW_PICS_LIST[13], // Teacher award
+  ];
+
   return (
     <div className="about-page">
       {/* Hero Section */}
@@ -59,7 +68,31 @@ function About() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Gallery Section */}
+      <section className="about-gallery-preview-section">
+        <div className="about-gallery-header">
+          <span className="about-gallery-badge">Campus Life</span>
+          <h2>Campus Moments & Celebrations</h2>
+          <p>
+            Discover the vibrant atmosphere, academic milestones, and student life at Mount Summer Convent School.
+          </p>
+        </div>
+        <div className="about-gallery-grid">
+          {previewPics.map((pic) => (
+            <Link to="/gallery" key={pic.id} className="about-gallery-card">
+              <img src={pic.src} alt={pic.title} loading="lazy" />
+              <div className="about-gallery-card-overlay">
+                <span>{pic.title}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="about-gallery-cta-wrap">
+          <Link to="/gallery" className="about-gallery-btn">
+            Explore All 30+ Photos in Gallery →
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

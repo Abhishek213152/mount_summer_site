@@ -14,6 +14,11 @@ import Apply from "./components/Apply";
 import Calender from "./components/Calender";
 import Principal from "./components/Principal";
 import Director from "./components/Director";
+import Gallery from "./components/Gallery";
+import {
+  CAROUSEL_HIGHLIGHT_PHOTOS,
+  NEW_PICS_LIST,
+} from "./data/galleryData";
 
 // Image imports
 import academicImg from "./assets/academic.png";
@@ -55,7 +60,11 @@ const useImageCache = () => {
       return new Promise((resolve) => {
         reader.onloadend = () => {
           const base64data = reader.result;
-          localStorage.setItem(cacheKey, base64data);
+          try {
+            localStorage.setItem(cacheKey, base64data);
+          } catch (e) {
+            console.warn("Could not cache image in localStorage:", e);
+          }
           resolve(base64data);
         };
         reader.readAsDataURL(blob);
@@ -161,6 +170,13 @@ function Navigation({ isMenuOpen, toggleMenu, isScrolled }) {
           About Us
         </Link>
         <Link
+          to="/gallery"
+          className={location.pathname === "/gallery" ? "active" : ""}
+          onClick={handleLinkClick}
+        >
+          Gallery
+        </Link>
+        <Link
           to="/apply"
           className={location.pathname === "/apply" ? "active" : ""}
           onClick={handleLinkClick}
@@ -216,17 +232,16 @@ function App() {
   const { cacheImage, getCachedImage } = useImageCache();
 
   // Memoized data
-  const photos = useMemo(
+  const photos = useMemo(() => CAROUSEL_HIGHLIGHT_PHOTOS, []);
+
+  const previewPhotos = useMemo(
     () => [
-      { src: ms2, cacheKey: "carousel_ms2" },
-      { src: ms1, cacheKey: "carousel_ms1" },
-      { src: ms0, cacheKey: "carousel_ms0" },
-      { src: ms3, cacheKey: "carousel_ms3" },
-      { src: ms4, cacheKey: "carousel_ms4" },
-      { src: ms5, cacheKey: "carousel_ms5" },
-      { src: ms6, cacheKey: "carousel_ms6" },
-      { src: ms7, cacheKey: "carousel_ms7" },
-      { src: ms8, cacheKey: "carousel_ms8" },
+      NEW_PICS_LIST[1], // Gandhi Jayanti three wise monkeys
+      NEW_PICS_LIST[9], // 1st Rank Felicitation
+      NEW_PICS_LIST[0], // Birthday celebration
+      NEW_PICS_LIST[13], // Teacher award handover
+      NEW_PICS_LIST[6], // Gandhi Jayanti group
+      NEW_PICS_LIST[27], // Students with school director
     ],
     []
   );
@@ -491,7 +506,27 @@ function App() {
                   </div>
                 </section>
 
-                {/* Photo Carousel */}
+                {/* Welcome Section (About Us) */}
+                <section className="welcome" id="about-welcome">
+                  <img src={studentImg} alt="Students" loading="lazy" />
+                  <div className="welcome-text">
+                    <h2>WELCOME TO</h2>
+                    <h1>Mount Summer Convent School</h1>
+                    <p>
+                      We are thrilled to welcome you to Mount Summer Convent
+                      School. Committed to academic excellence and moral leadership,
+                      we shape minds and nurture purpose-driven leaders.
+                    </p>
+                    <Link to="/about" className="cta-button">
+                      About Us
+                    </Link>
+                    <Link to="/apply" className="cta-button">
+                      Apply
+                    </Link>
+                  </div>
+                </section>
+
+                {/* Photo Carousel (Gallery Section) */}
                 <section
                   className="photo-carousel"
                   aria-label="School and Student Photo Gallery"
@@ -507,18 +542,38 @@ function App() {
                   >
                     {photos.map((photo, idx) => (
                       <div key={idx} className="carousel-item">
-                        <img
-                          src={cachedCarouselImages[idx] || photo.src}
-                          alt="Campus"
-                          className="carousel-image"
-                          loading="lazy"
-                        />
+                        <div className="carousel-frame">
+                          <div
+                            className="carousel-blur-backdrop"
+                            style={{
+                              backgroundImage: `url(${cachedCarouselImages[idx] || photo.src})`,
+                            }}
+                            aria-hidden="true"
+                          />
+                          <img
+                            src={cachedCarouselImages[idx] || photo.src}
+                            alt={photo.caption || "Mount Summer School Life"}
+                            className="carousel-image"
+                            loading="lazy"
+                          />
+                        </div>
+                        {photo.caption && (
+                          <div className="carousel-caption">
+                            <div className="carousel-caption-left">
+                              <span className="carousel-caption-badge">Campus Life</span>
+                              <h3 className="carousel-caption-title">{photo.caption}</h3>
+                            </div>
+                            <Link to="/gallery" className="carousel-caption-link">
+                              View Full Gallery →
+                            </Link>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                   <div className="carousel-controls">
-                    <button onClick={prevPhotoSlide}>‹</button>
-                    <button onClick={nextPhotoSlide}>›</button>
+                    <button onClick={prevPhotoSlide} aria-label="Previous slide">‹</button>
+                    <button onClick={nextPhotoSlide} aria-label="Next slide">›</button>
                   </div>
                   <div className="carousel-dots">
                     {photos.map((_, idx) => (
@@ -528,26 +583,43 @@ function App() {
                           idx === currentPhotoSlide ? "active" : ""
                         }`}
                         onClick={() => handlePhotoSlideClick(idx)}
+                        aria-label={`Slide ${idx + 1}`}
                       />
                     ))}
                   </div>
                 </section>
 
-                {/* Welcome Section */}
-                <section className="welcome">
-                  <img src={studentImg} alt="Students" loading="lazy" />
-                  <div className="welcome-text">
-                    <h2>WELCOME TO</h2>
-                    <h1>Mount Summer Convent School</h1>
+                {/* Campus Life & New Photos Highlights Section */}
+                <section className="home-moments-showcase" aria-label="Campus Moments and Life">
+                  <div className="moments-header">
+                    <span className="moments-eyebrow">Moments of Joy & Achievement</span>
+                    <h2>Life at Mount Summer Convent School</h2>
                     <p>
-                      We are thrilled to welcome you to Mount Summer Convent
-                      School...
+                      Celebrating student brilliance, cultural heritage, leadership awards, and daily inspiration in Darbhanga.
                     </p>
-                    <Link to="/about" className="cta-button">
-                      About Us
-                    </Link>
-                    <Link to="/apply" className="cta-button">
-                      Apply
+                  </div>
+
+                  <div className="moments-grid">
+                    {previewPhotos.map((photo) => (
+                      <Link to="/gallery" key={photo.id} className="moment-card">
+                        <div className="moment-img-box">
+                          <img src={photo.src} alt={photo.title} loading="lazy" />
+                          <span className="moment-badge">{photo.tag}</span>
+                          <div className="moment-hover-overlay">
+                            <span>View in Gallery ↗</span>
+                          </div>
+                        </div>
+                        <div className="moment-body">
+                          <h3>{photo.title}</h3>
+                          <p>{photo.description}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  <div className="moments-cta-wrap">
+                    <Link to="/gallery" className="moments-explore-btn">
+                      Explore All 30+ Photos in Full Gallery →
                     </Link>
                   </div>
                 </section>
@@ -678,90 +750,108 @@ function App() {
 
                 {/* Calendar */}
                 <section className="calendar">
-                  <h1>CALENDAR</h1>
+                  <div className="calendar-home-badge">
+                    <span>📅</span> Extended Schedule Till April 2027
+                  </div>
+                  <h1>ACADEMIC CALENDAR & HOLIDAYS</h1>
+                  <p className="calendar-home-subtitle">
+                    Stay updated with all examinations, vacation periods, and official holiday schedules through April 2027.
+                  </p>
 
                   {/* Desktop Calendar Grid */}
                   <div className="calendar-grid desktop-calendar">
                     <div className="category">
-                      <h3>Academics</h3>
+                      <h3>📘 Academics & Examinations</h3>
                       <ul>
                         <li>
-                          Ambedkar Jayanti <span>Apr 14, 2025</span>
+                          Periodic Assessment - I <span>May 18–23, 2026</span>
                         </li>
                         <li>
-                          Mount Summer Foundation Day <span>June 17, 2025</span>
+                          Summer Vacation <span>June 1–24, 2026</span>
                         </li>
                         <li>
-                          Teacher's Day <span>Sept 5, 2025</span>
+                          Half Yearly Exams <span>Sept 21–28, 2026</span>
+                        </li>
+                        <li>
+                          Annual Final Exams <span>Mar 12–22, 2027</span>
+                        </li>
+                        <li>
+                          Result & New Session <span>Apr 5–10, 2027</span>
                         </li>
                       </ul>
                     </div>
                     <div className="category">
-                      <h3>Athletics</h3>
+                      <h3>🎉 Festivals & Celebrations</h3>
                       <ul>
                         <li>
-                          Gandhi Jayanti <span>Oct 2, 2025</span>
+                          Foundation Day <span>June 17, 2026</span>
                         </li>
                         <li>
-                          Children's Day <span>Nov 14, 2025</span>
+                          Independence & Teacher's Day <span>Aug–Sept 2026</span>
                         </li>
                         <li>
-                          Dr.Rajendra Prasad Jayanti <span>Dec 3, 2025</span>
+                          Durga Puja & Diwali <span>Oct–Nov 2026</span>
+                        </li>
+                        <li>
+                          Republic Day & Saraswati Puja <span>Jan–Feb 2027</span>
+                        </li>
+                        <li>
+                          Holi & Ram Navami <span>Mar–Apr 2027</span>
                         </li>
                       </ul>
                     </div>
                   </div>
                   <Link to="/calendar" className="view-full desktop-view-full">
-                    VIEW FULL CALENDAR
+                    VIEW COMPLETE 2026–2027 HOLIDAY CALENDAR →
                   </Link>
 
                   {/* Mobile Calendar Cards */}
                   <div className="mobile-calendar-cards">
                     <div className="mobile-calendar-card">
-                      <div className="calendar-icon">📚</div>
-                      <h3>Ambedkar Jayanti</h3>
-                      <p className="event-date">Apr 14, 2025</p>
+                      <div className="calendar-icon">📝</div>
+                      <h3>Periodic Assessment - I</h3>
+                      <p className="event-date">May 18–23, 2026</p>
                       <span className="event-category">Academics</span>
+                    </div>
+
+                    <div className="mobile-calendar-card">
+                      <div className="calendar-icon">🌴</div>
+                      <h3>Summer Vacation</h3>
+                      <p className="event-date">June 1–24, 2026</p>
+                      <span className="event-category">Vacation</span>
                     </div>
 
                     <div className="mobile-calendar-card">
                       <div className="calendar-icon">🎓</div>
                       <h3>Foundation Day</h3>
-                      <p className="event-date">June 17, 2025</p>
+                      <p className="event-date">June 17, 2026</p>
+                      <span className="event-category">Celebration</span>
+                    </div>
+
+                    <div className="mobile-calendar-card">
+                      <div className="calendar-icon">📚</div>
+                      <h3>Half Yearly Exams</h3>
+                      <p className="event-date">Sept 21–28, 2026</p>
                       <span className="event-category">Academics</span>
                     </div>
 
                     <div className="mobile-calendar-card">
-                      <div className="calendar-icon">👨‍🏫</div>
-                      <h3>Teacher's Day</h3>
-                      <p className="event-date">Sept 5, 2025</p>
-                      <span className="event-category">Academics</span>
+                      <div className="calendar-icon">🪔</div>
+                      <h3>Durga Puja & Diwali Break</h3>
+                      <p className="event-date">Oct–Nov 2026</p>
+                      <span className="event-category">Holidays</span>
                     </div>
 
                     <div className="mobile-calendar-card">
-                      <div className="calendar-icon">🏃‍♂️</div>
-                      <h3>Gandhi Jayanti</h3>
-                      <p className="event-date">Oct 2, 2025</p>
-                      <span className="event-category">Athletics</span>
-                    </div>
-
-                    <div className="mobile-calendar-card">
-                      <div className="calendar-icon">🎈</div>
-                      <h3>Children's Day</h3>
-                      <p className="event-date">Nov 14, 2025</p>
-                      <span className="event-category">Athletics</span>
-                    </div>
-
-                    <div className="mobile-calendar-card">
-                      <div className="calendar-icon">🎯</div>
-                      <h3>Dr. Rajendra Prasad Jayanti</h3>
-                      <p className="event-date">Dec 3, 2025</p>
-                      <span className="event-category">Athletics</span>
+                      <div className="calendar-icon">🏆</div>
+                      <h3>Final Exams & Results</h3>
+                      <p className="event-date">Mar–Apr 2027</p>
+                      <span className="event-category">Annual Term</span>
                     </div>
                   </div>
 
                   <Link to="/calendar" className="view-full mobile-view-full">
-                    VIEW FULL CALENDAR
+                    VIEW COMPLETE 2026–2027 HOLIDAY CALENDAR →
                   </Link>
                 </section>
 
@@ -824,6 +914,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/apply" element={<Apply />} />
           <Route path="/calendar" element={<Calender />} />
+          <Route path="/gallery" element={<Gallery />} />
           <Route path="/principal" element={<Principal />} />
           <Route path="/director" element={<Director />} />
         </Routes>
@@ -890,9 +981,10 @@ function App() {
             <h3 className="footer-section-title">Quick Links</h3>
             <div className="links-grid">
               <FooterLink to="/about">About</FooterLink>
+              <FooterLink to="/gallery">Gallery</FooterLink>
               <FooterLink to="/apply">Admissions</FooterLink>
               <FooterLink to="/calendar">Academics</FooterLink>
-              <FooterLink to="#">Home</FooterLink>
+              <FooterLink to="/">Home</FooterLink>
               <a
                 href="#mission"
                 onClick={(e) => {

@@ -1,992 +1,1283 @@
-import React, { useState, useEffect } from "react";
+// src/components/Calender.jsx
+import React, { useState, useMemo } from "react";
+import "./Calender.css";
 
 const Calendar = () => {
-  const [activeSection, setActiveSection] = useState(null);
-  const [isVisible, setIsVisible] = useState({});
-  const [isMobile, setIsMobile] = useState(false);
+  const [selectedSession, setSelectedSession] = useState("2026-27"); // Default to 2026-2027 extended
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+  // ==========================================
+  // Comprehensive Holiday & Academic Datasets
+  // ==========================================
 
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsVisible((prev) => ({ ...prev, [entry.target.id]: true }));
-          }
-        });
+  // 1. Vacation Schedules
+  const allVacations = useMemo(
+    () => [
+      // 2026-2027 Academic Year (Till April 2027)
+      {
+        session: "2026-27",
+        sl: "01",
+        title: "Summer Vacation 2026",
+        date: "01-06-2026 to 24-06-2026",
+        day: "Monday to Wednesday",
+        days: "24",
+        category: "vacation",
       },
-      { threshold: 0.1 }
-    );
+      {
+        session: "2026-27",
+        sl: "02",
+        title: "Durga Puja Vacation 2026",
+        date: "17-10-2026 to 22-10-2026",
+        day: "Saturday to Thursday",
+        days: "06",
+        category: "vacation",
+      },
+      {
+        session: "2026-27",
+        sl: "03",
+        title: "Dipawali & Chhath Puja 2026",
+        date: "08-11-2026 to 17-11-2026",
+        day: "Sunday to Tuesday",
+        days: "10",
+        category: "vacation",
+      },
+      {
+        session: "2026-27",
+        sl: "04",
+        title: "Winter Break & New Year 2027",
+        date: "30-12-2026 to 02-01-2027",
+        day: "Wednesday to Saturday",
+        days: "04",
+        category: "vacation",
+      },
+      {
+        session: "2026-27",
+        sl: "05",
+        title: "Holi Vacation 2027",
+        date: "21-03-2027 to 24-03-2027",
+        day: "Sunday to Wednesday",
+        days: "04",
+        category: "vacation",
+      },
 
-    const elements = document.querySelectorAll("[data-animate]");
-    elements.forEach((el) => observer.observe(el));
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", checkMobile);
-    };
-  }, []);
-
-  const styles = {
-    globalReset: `
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html, body, #root {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        overflow-x: hidden;
-      }
-      
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
-      @keyframes slideInRight {
-        from {
-          opacity: 0;
-          transform: translateX(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateX(0);
-        }
-      }
-      
-      @keyframes gradientMove {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
-      
-      @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-      }
-      
-      @keyframes shimmer {
-        0% { background-position: -200px 0; }
-        100% { background-position: calc(200px + 100%) 0; }
-      }
-      
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-      }
-      
-      .animate-in {
-        animation: fadeInUp 0.6s ease-out forwards;
-      }
-      
-      .animate-slide {
-        animation: slideInRight 0.8s ease-out forwards;
-      }
-
-      /* Mobile responsive styles */
-      @media (max-width: 768px) {
-        .mobile-hidden {
-          display: none !important;
-        }
-        
-        .mobile-visible {
-          display: block !important;
-        }
-      }
-
-      @media (min-width: 769px) {
-        .mobile-visible {
-          display: none !important;
-        }
-      }
-    `,
-
-    container: {
-      minHeight: "100vh",
-      background: "#ffffff",
-      fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      padding: "calc(2rem + 110px) 0 2rem 0",
-      position: "relative",
-      overflow: "hidden",
-    },
-
-    floatingElements: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      pointerEvents: "none",
-      zIndex: 1,
-    },
-
-    floatingCircle: {
-      position: "absolute",
-      borderRadius: "50%",
-      background: "rgba(255, 255, 255, 0.1)",
-      animation: "float 6s ease-in-out infinite",
-    },
-
-    innerContainer: {
-      maxWidth: "1200px",
-      margin: "0 auto",
-      padding: "0 2rem",
-      position: "relative",
-      zIndex: 2,
-    },
-
-    mainTitle: {
-      fontSize: "clamp(2rem, 5vw, 3.5rem)",
-      fontWeight: "800",
-      textAlign: "center",
-      marginBottom: "3rem",
-      color: "#1f2937",
-      textShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-      letterSpacing: "-1px",
-      position: "relative",
-    },
-
-    titleUnderline: {
-      width: "150px",
-      height: "6px",
-      background: "linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24)",
-      margin: "1rem auto",
-      borderRadius: "3px",
-      animation: "shimmer 2s infinite",
-    },
-
-    section: {
-      background: "rgba(255, 255, 255, 0.95)",
-      backdropFilter: "blur(20px)",
-      borderRadius: "2rem",
-      padding: "2.5rem",
-      marginBottom: "3rem",
-      boxShadow:
-        "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)",
-      border: "1px solid rgba(255, 255, 255, 0.2)",
-      position: "relative",
-      overflow: "hidden",
-      cursor: "pointer",
-      transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-      transform: "translateY(0)",
-      opacity: 1,
-    },
-
-    sectionMobile: {
-      background: "rgba(255, 255, 255, 0.95)",
-      backdropFilter: "blur(20px)",
-      borderRadius: "1.5rem",
-      padding: "1.5rem",
-      marginBottom: "2rem",
-      boxShadow:
-        "0 15px 30px -10px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1)",
-      border: "1px solid rgba(255, 255, 255, 0.2)",
-      position: "relative",
-      overflow: "hidden",
-      transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-      transform: "translateY(0)",
-      opacity: 1,
-    },
-
-    sectionHover: {
-      transform: "translateY(-8px)",
-      boxShadow:
-        "0 35px 60px -15px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2)",
-    },
-
-    sectionTopBorder: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      height: "4px",
-      background: "linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b)",
-      backgroundSize: "400% 100%",
-      animation: "gradientMove 3s ease infinite",
-    },
-
-    sectionTitle: {
-      fontSize: "clamp(1.5rem, 4vw, 2.25rem)",
-      fontWeight: "700",
-      color: "#1f2937",
-      marginBottom: "2rem",
-      textAlign: "center",
-      position: "relative",
-      paddingBottom: "1rem",
-    },
-
-    sectionTitleAfter: {
-      position: "absolute",
-      bottom: 0,
-      left: "50%",
-      transform: "translateX(-50%)",
-      width: "80px",
-      height: "3px",
-      background: "linear-gradient(90deg, #3b82f6, #8b5cf6)",
-      borderRadius: "2px",
-    },
-
-    // Desktop table styles
-    table: {
-      width: "100%",
-      borderCollapse: "collapse",
-      borderRadius: "1rem",
-      overflow: "hidden",
-      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
-      background: "white",
-    },
-
-    tableHeader: {
-      background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
-      color: "white",
-    },
-
-    th: {
-      padding: "1.5rem 1rem",
-      textAlign: "left",
-      fontWeight: "600",
-      fontSize: "1rem",
-      letterSpacing: "0.5px",
-      textTransform: "uppercase",
-      position: "relative",
-    },
-
-    td: {
-      padding: "1.25rem 1rem",
-      borderBottom: "1px solid #e5e7eb",
-      fontSize: "1rem",
-      color: "#374151",
-      transition: "all 0.3s ease",
-      position: "relative",
-    },
-
-    tableRow: {
-      transition: "all 0.3s ease",
-      cursor: "pointer",
-    },
-
-    tableRowHover: {
-      background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-      transform: "scale(1.01)",
-      boxShadow: "0 4px 12px -2px rgba(0, 0, 0, 0.1)",
-    },
-
-    // Mobile card styles
-    mobileCardsContainer: {
-      display: "grid",
-      gap: "1rem",
-      gridTemplateColumns: "1fr",
-    },
-
-    mobileCard: {
-      background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-      borderRadius: "1rem",
-      padding: "1.25rem",
-      border: "1px solid #e2e8f0",
-      transition: "all 0.3s ease",
-      cursor: "pointer",
-      position: "relative",
-      overflow: "hidden",
-      boxShadow:
-        "0 8px 25px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
-    },
-
-    mobileCardHover: {
-      transform: "translateY(-5px)",
-      boxShadow:
-        "0 15px 35px rgba(0, 0, 0, 0.18), 0 8px 15px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
-      background: "linear-gradient(135deg, #f1f5f9 0%, #dbeafe 100%)",
-    },
-
-    mobileCardHeader: {
-      display: "flex",
-      alignItems: "center",
-      gap: "0.75rem",
-      marginBottom: "1rem",
-    },
-
-    mobileCardNumber: {
-      background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
-      color: "white",
-      borderRadius: "50%",
-      width: "2rem",
-      height: "2rem",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "0.875rem",
-      fontWeight: "600",
-      flexShrink: 0,
-    },
-
-    mobileCardTitle: {
-      fontSize: "1.125rem",
-      fontWeight: "600",
-      color: "#1f2937",
-      flex: 1,
-    },
-
-    mobileCardContent: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "0.75rem",
-    },
-
-    mobileCardRow: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: "0.5rem 0",
-      borderBottom: "1px solid #e5e7eb",
-    },
-
-    mobileCardRowLast: {
-      borderBottom: "none",
-    },
-
-    mobileCardLabel: {
-      fontSize: "0.875rem",
-      fontWeight: "500",
-      color: "#6b7280",
-      textTransform: "uppercase",
-      letterSpacing: "0.5px",
-    },
-
-    mobileCardValue: {
-      fontSize: "0.875rem",
-      fontWeight: "600",
-      color: "#374151",
-      textAlign: "right",
-      maxWidth: "60%",
-    },
-
-    mobileCardDate: {
-      fontSize: "0.65rem",
-      fontWeight: "600",
-      color: "#92400e",
-      background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
-      padding: "0.15rem 0.5rem",
-      borderRadius: "0.5rem",
-      border: "1px solid #fbbf24",
-      textAlign: "center",
-      lineHeight: "1.2",
-    },
-
-    serialNumber: {
-      background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
-      color: "white",
-      borderRadius: "50%",
-      width: "30px",
-      height: "30px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "0.875rem",
-      fontWeight: "600",
-      margin: "0 auto",
-    },
-
-    importantDate: {
-      background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
-      padding: "0.5rem 1rem",
-      borderRadius: "2rem",
-      fontSize: "0.875rem",
-      fontWeight: "600",
-      color: "#92400e",
-      display: "inline-block",
-      border: "1px solid #fbbf24",
-    },
-
-    notes: {
-      background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
-      border: "1px solid #93c5fd",
-      borderRadius: "1rem",
-      padding: "1.5rem",
-      marginTop: "2rem",
-      position: "relative",
-      overflow: "hidden",
-    },
-
-    notesMobile: {
-      background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
-      border: "1px solid #93c5fd",
-      borderRadius: "0.75rem",
-      padding: "1rem",
-      marginTop: "1.5rem",
-      position: "relative",
-      overflow: "hidden",
-    },
-
-    notesIcon: {
-      position: "absolute",
-      top: "-10px",
-      right: "-10px",
-      width: "40px",
-      height: "40px",
-      background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-      borderRadius: "50%",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "white",
-      fontSize: "1.2rem",
-      animation: "pulse 2s infinite",
-    },
-
-    notesParagraph: {
-      color: "#1e40af",
-      fontSize: "0.95rem",
-      marginBottom: "0.5rem",
-      fontWeight: "500",
-      lineHeight: "1.6",
-    },
-
-    notesParagraphMobile: {
-      color: "#1e40af",
-      fontSize: "0.875rem",
-      marginBottom: "0.5rem",
-      fontWeight: "500",
-      lineHeight: "1.5",
-    },
-
-    sessionYear: {
-      background: "linear-gradient(135deg, #1e293b 0%, #3b82f6 100%)",
-      color: "white",
-      padding: "2rem",
-      borderRadius: "2rem",
-      textAlign: "center",
-      fontSize: "1.75rem",
-      fontWeight: "700",
-      marginTop: "3rem",
-      position: "relative",
-      overflow: "hidden",
-      boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.2)",
-    },
-
-    sessionYearMobile: {
-      background: "linear-gradient(135deg, #1e293b 0%, #3b82f6 100%)",
-      color: "white",
-      padding: "1.5rem",
-      borderRadius: "1.5rem",
-      textAlign: "center",
-      fontSize: "1.25rem",
-      fontWeight: "700",
-      marginTop: "2rem",
-      position: "relative",
-      overflow: "hidden",
-      boxShadow: "0 15px 30px -10px rgba(0, 0, 0, 0.2)",
-    },
-
-    sessionYearBg: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background:
-        'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M20 20c0 0 8-8 8-8s8 8 8 8-8 8-8 8-8-8-8-8z"/%3E%3C/g%3E%3C/svg%3E")',
-      opacity: 0.1,
-    },
-
-    categoryBadge: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "0.5rem",
-      padding: "0.5rem 1rem",
-      borderRadius: "2rem",
-      fontSize: "0.875rem",
-      fontWeight: "600",
-      textTransform: "uppercase",
-      letterSpacing: "0.5px",
-    },
-
-    categoryBadgeMobile: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "0.4rem",
-      padding: "0.4rem 0.8rem",
-      borderRadius: "1.5rem",
-      fontSize: "0.7rem",
-      fontWeight: "600",
-      textTransform: "uppercase",
-      letterSpacing: "0.3px",
-    },
-
-    vacationBadge: {
-      background: "linear-gradient(135deg, #fecaca 0%, #fca5a5 100%)",
-      color: "#991b1b",
-      border: "1px solid #f87171",
-    },
-
-    examBadge: {
-      background: "linear-gradient(135deg, #fed7aa 0%, #fdba74 100%)",
-      color: "#9a3412",
-      border: "1px solid #fb923c",
-    },
-
-    celebrationBadge: {
-      background: "linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)",
-      color: "#065f46",
-      border: "1px solid #34d399",
-    },
-
-    holidayBadge: {
-      background: "linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)",
-      color: "#3730a3",
-      border: "1px solid #818cf8",
-    },
-  };
-
-  const vacationData = [
-    [
-      "01",
-      "Summer Vacation",
-      "04-06-2025 to 25-06-2025",
-      "Wednesday to Wednesday",
-      "22",
+      // 2025-2026 Academic Year
+      {
+        session: "2025-26",
+        sl: "01",
+        title: "Summer Vacation 2025",
+        date: "04-06-2025 to 25-06-2025",
+        day: "Wednesday to Wednesday",
+        days: "22",
+        category: "vacation",
+      },
+      {
+        session: "2025-26",
+        sl: "02",
+        title: "Durga Puja Vacation 2025",
+        date: "27-09-2025 to 03-10-2025",
+        day: "Saturday to Friday",
+        days: "07",
+        category: "vacation",
+      },
+      {
+        session: "2025-26",
+        sl: "03",
+        title: "Dipawali & Chhath 2025",
+        date: "20-10-2025 to 30-10-2025",
+        day: "Monday to Thursday",
+        days: "10",
+        category: "vacation",
+      },
     ],
-    [
-      "02",
-      "Durga Puja",
-      "27-09-2025 to 03-10-2025",
-      "Saturday to Friday",
-      "07",
-    ],
-    [
-      "03",
-      "Dipawali & Chhath",
-      "20-10-2025 to 30-10-2025",
-      "Monday to Thursday",
-      "10",
-    ],
-  ];
-
-  const examData = [
-    ["01", "P.A. - I", "20-05-2025 to 24-05-2025"],
-    ["02", "P.A. - II", "07-08-2025 to 13-08-2025"],
-    ["03", "Half Yearly Examination", "20-09-2025 to 26-09-2025"],
-    ["04", "P.A. - III", "25-11-2025 to 29-11-2025"],
-    ["05", "P.A. - IV", "20-01-2026 to 24-01-2026"],
-    ["06", "Final Examination", "10-03-2026 to 20-03-2026"],
-  ];
-
-  const celebrationData = [
-    ["01", "Ambedkar Jayanti", "14th April 2025"],
-    ["02", "Mount Summer Foundation Day", "17th June 2025"],
-    ["03", "Independence Day", "15th August 2025"],
-    ["04", "Teacher's Day", "5th September 2025"],
-    ["05", "Gandhi Jayanti", "2nd October 2025"],
-    ["06", "Children's Day", "14th November 2025"],
-    ["07", "Dr. Rajendra Prasad Jayanti", "3rd December 2025"],
-    ["08", "Republic Day", "26th January 2026"],
-  ];
-
-  const holidayData = [
-    ["01", "Ram Navami", "06-04-2025", "Sunday", "01"],
-    ["02", "Eid-Ul-Azha", "07-06-2025", "Saturday", "01"],
-    ["03", "Muharram", "06-07-2025", "Sunday", "01"],
-    ["04", "Raksha Bandhan", "09-08-2025", "Saturday", "01"],
-    ["05", "Janmashtami", "16-08-2025", "Saturday", "01"],
-    ["06", "Ganesh Chaturthi", "28-08-2025", "Thursday", "01"],
-    ["07", "Vishwakarma Puja", "17-09-2025", "Wednesday", "01"],
-    ["08", "Christmas", "25-12-2025", "Thursday", "01"],
-    ["09", "New Year", "31-12-2025 to 01-01-2026", "Wed–Thu", "02"],
-    ["10", "Makar Sankranti", "14-01-2026", "Wednesday", "01"],
-    ["11", "Vasant Panchami", "21-01-2026", "Wednesday", "01"],
-    ["12", "Maha Shivratri", "15-02-2026", "Sunday", "01"],
-    ["13", "Holi", "04-03-2026 to 06-03-2026", "Wed–Fri", "03"],
-    ["14", "Id-ul-Fiter", "21-03-2026", "Saturday", "01"],
-  ];
-
-  const handleSectionHover = (sectionId, isHovering) => {
-    setActiveSection(isHovering ? sectionId : null);
-  };
-
-  const renderMobileCard = (row, headers, sectionId, rowIndex) => {
-    const [serial, title, date, day, days] = row;
-
-    return (
-      <div
-        key={rowIndex}
-        style={styles.mobileCard}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = styles.mobileCardHover.background;
-          e.currentTarget.style.transform = styles.mobileCardHover.transform;
-          e.currentTarget.style.boxShadow = styles.mobileCardHover.boxShadow;
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = styles.mobileCard.background;
-          e.currentTarget.style.transform = "translateY(0)";
-          e.currentTarget.style.boxShadow = "none";
-        }}
-      >
-        <div style={styles.mobileCardHeader}>
-          <div style={styles.mobileCardNumber}>{serial}</div>
-          <div style={styles.mobileCardTitle}>{title}</div>
-        </div>
-        <div style={styles.mobileCardContent}>
-          {date && (
-            <div style={styles.mobileCardRow}>
-              <span style={styles.mobileCardLabel}>Date</span>
-              <span style={styles.mobileCardDate}>{date}</span>
-            </div>
-          )}
-          {day && (
-            <div style={styles.mobileCardRow}>
-              <span style={styles.mobileCardLabel}>Day</span>
-              <span style={styles.mobileCardValue}>{day}</span>
-            </div>
-          )}
-          {days && (
-            <div style={styles.mobileCardRow}>
-              <span style={styles.mobileCardLabel}>Duration</span>
-              <span style={styles.mobileCardValue}>{days} days</span>
-            </div>
-          )}
-          {!day && !days && date && (
-            <div style={styles.mobileCardRow}>
-              <span style={styles.mobileCardLabel}>Date</span>
-              <span style={styles.mobileCardValue}>{date}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  const renderTable = (data, headers, badgeStyle, sectionId) => (
-    <div
-      style={{
-        ...(isMobile ? styles.sectionMobile : styles.section),
-        ...(activeSection === sectionId ? styles.sectionHover : {}),
-        transform: isVisible[sectionId] ? "translateY(0)" : "translateY(50px)",
-        opacity: isVisible[sectionId] ? 1 : 0,
-        transition: "all 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
-      }}
-      onMouseEnter={() => handleSectionHover(sectionId, true)}
-      onMouseLeave={() => handleSectionHover(sectionId, false)}
-      id={sectionId}
-      data-animate
-    >
-      <div style={styles.sectionTopBorder}></div>
-      <div style={styles.sectionTitle}>
-        {headers.title}
-        <div style={styles.sectionTitleAfter}></div>
-      </div>
-      <div
-        style={{
-          ...(isMobile ? styles.categoryBadgeMobile : styles.categoryBadge),
-          ...badgeStyle,
-        }}
-      >
-        {headers.icon} {headers.category}
-      </div>
-
-      {/* Desktop Table */}
-      <div className="mobile-hidden">
-        <table style={styles.table}>
-          <thead style={styles.tableHeader}>
-            <tr>
-              {headers.columns.map((header, index) => (
-                <th key={index} style={styles.th}>
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                style={styles.tableRow}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background =
-                    styles.tableRowHover.background;
-                  e.currentTarget.style.transform =
-                    styles.tableRowHover.transform;
-                  e.currentTarget.style.boxShadow =
-                    styles.tableRowHover.boxShadow;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.transform = "scale(1)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
-                {row.map((cell, cellIndex) => (
-                  <td key={cellIndex} style={styles.td}>
-                    {cellIndex === 0 ? (
-                      <div style={styles.serialNumber}>{cell}</div>
-                    ) : cellIndex === 2 && sectionId !== "celebrations" ? (
-                      <span style={styles.importantDate}>{cell}</span>
-                    ) : (
-                      cell
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile Cards */}
-      <div className="mobile-visible">
-        <div style={styles.mobileCardsContainer}>
-          {data.map((row, rowIndex) =>
-            renderMobileCard(row, headers, sectionId, rowIndex)
-          )}
-        </div>
-      </div>
-    </div>
+    []
   );
 
+  // 2. Examination Schedules
+  const allExams = useMemo(
+    () => [
+      // 2026-2027 Academic Year (Till April 2027)
+      {
+        session: "2026-27",
+        sl: "01",
+        title: "Periodic Assessment - I (P.A. - I)",
+        date: "18-05-2026 to 23-05-2026",
+        day: "Monday to Saturday",
+        days: "06",
+        category: "exams",
+      },
+      {
+        session: "2026-27",
+        sl: "02",
+        title: "Periodic Assessment - II (P.A. - II)",
+        date: "10-08-2026 to 14-08-2026",
+        day: "Monday to Friday",
+        days: "05",
+        category: "exams",
+      },
+      {
+        session: "2026-27",
+        sl: "03",
+        title: "Half Yearly Examination (Term - I)",
+        date: "21-09-2026 to 28-09-2026",
+        day: "Monday to Monday",
+        days: "07",
+        category: "exams",
+      },
+      {
+        session: "2026-27",
+        sl: "04",
+        title: "Periodic Assessment - III (P.A. - III)",
+        date: "23-11-2026 to 28-11-2026",
+        day: "Monday to Saturday",
+        days: "06",
+        category: "exams",
+      },
+      {
+        session: "2026-27",
+        sl: "05",
+        title: "Periodic Assessment - IV (P.A. - IV)",
+        date: "18-01-2027 to 23-01-2027",
+        day: "Monday to Saturday",
+        days: "06",
+        category: "exams",
+      },
+      {
+        session: "2026-27",
+        sl: "06",
+        title: "Final Annual Examination (Term - II)",
+        date: "12-03-2027 to 22-03-2027",
+        day: "Friday to Monday",
+        days: "10",
+        category: "exams",
+      },
+      {
+        session: "2026-27",
+        sl: "07",
+        title: "Annual Result Declaration & Promotion",
+        date: "05-04-2027 to 08-04-2027",
+        day: "Monday to Thursday",
+        days: "04",
+        category: "exams",
+      },
+
+      // 2025-2026 Academic Year
+      {
+        session: "2025-26",
+        sl: "01",
+        title: "P.A. - I",
+        date: "20-05-2025 to 24-05-2025",
+        day: "Tuesday to Saturday",
+        days: "05",
+        category: "exams",
+      },
+      {
+        session: "2025-26",
+        sl: "02",
+        title: "P.A. - II",
+        date: "07-08-2025 to 13-08-2025",
+        day: "Thursday to Wednesday",
+        days: "06",
+        category: "exams",
+      },
+      {
+        session: "2025-26",
+        sl: "03",
+        title: "Half Yearly Examination",
+        date: "20-09-2025 to 26-09-2025",
+        day: "Saturday to Friday",
+        days: "07",
+        category: "exams",
+      },
+      {
+        session: "2025-26",
+        sl: "04",
+        title: "P.A. - III",
+        date: "25-11-2025 to 29-11-2025",
+        day: "Tuesday to Saturday",
+        days: "05",
+        category: "exams",
+      },
+      {
+        session: "2025-26",
+        sl: "05",
+        title: "P.A. - IV",
+        date: "20-01-2026 to 24-01-2026",
+        day: "Tuesday to Saturday",
+        days: "05",
+        category: "exams",
+      },
+      {
+        session: "2025-26",
+        sl: "06",
+        title: "Final Examination",
+        date: "10-03-2026 to 20-03-2026",
+        day: "Tuesday to Friday",
+        days: "10",
+        category: "exams",
+      },
+    ],
+    []
+  );
+
+  // 3. School Celebrations
+  const allCelebrations = useMemo(
+    () => [
+      // 2026-2027 Academic Year (Till April 2027)
+      {
+        session: "2026-27",
+        sl: "01",
+        title: "Ambedkar Jayanti",
+        date: "14th April 2026",
+        day: "Tuesday",
+        category: "celebrations",
+      },
+      {
+        session: "2026-27",
+        sl: "02",
+        title: "Mount Summer Foundation Day",
+        date: "17th June 2026",
+        day: "Wednesday",
+        category: "celebrations",
+      },
+      {
+        session: "2026-27",
+        sl: "03",
+        title: "Independence Day Celebrations",
+        date: "15th August 2026",
+        day: "Saturday",
+        category: "celebrations",
+      },
+      {
+        session: "2026-27",
+        sl: "04",
+        title: "Teacher's Day & Special Felicitations",
+        date: "5th September 2026",
+        day: "Saturday",
+        category: "celebrations",
+      },
+      {
+        session: "2026-27",
+        sl: "05",
+        title: "Gandhi Jayanti & Shastri Jayanti",
+        date: "2nd October 2026",
+        day: "Friday",
+        category: "celebrations",
+      },
+      {
+        session: "2026-27",
+        sl: "06",
+        title: "Children's Day & Annual Sports Carnival",
+        date: "14th November 2026",
+        day: "Saturday",
+        category: "celebrations",
+      },
+      {
+        session: "2026-27",
+        sl: "07",
+        title: "Dr. Rajendra Prasad Jayanti",
+        date: "3rd December 2026",
+        day: "Thursday",
+        category: "celebrations",
+      },
+      {
+        session: "2026-27",
+        sl: "08",
+        title: "Republic Day Parade & Flag Hoisting",
+        date: "26th January 2027",
+        day: "Tuesday",
+        category: "celebrations",
+      },
+      {
+        session: "2026-27",
+        sl: "09",
+        title: "Ambedkar Jayanti 2027",
+        date: "14th April 2027",
+        day: "Wednesday",
+        category: "celebrations",
+      },
+      {
+        session: "2026-27",
+        sl: "10",
+        title: "Mount Summer Annual Exhibition & Awards",
+        date: "24th April 2027",
+        day: "Saturday",
+        category: "celebrations",
+      },
+
+      // 2025-2026 Academic Year
+      {
+        session: "2025-26",
+        sl: "01",
+        title: "Ambedkar Jayanti",
+        date: "14th April 2025",
+        day: "Monday",
+        category: "celebrations",
+      },
+      {
+        session: "2025-26",
+        sl: "02",
+        title: "Mount Summer Foundation Day",
+        date: "17th June 2025",
+        day: "Tuesday",
+        category: "celebrations",
+      },
+      {
+        session: "2025-26",
+        sl: "03",
+        title: "Independence Day",
+        date: "15th August 2025",
+        day: "Friday",
+        category: "celebrations",
+      },
+      {
+        session: "2025-26",
+        sl: "04",
+        title: "Teacher's Day",
+        date: "5th September 2025",
+        day: "Friday",
+        category: "celebrations",
+      },
+      {
+        session: "2025-26",
+        sl: "05",
+        title: "Gandhi Jayanti",
+        date: "2nd October 2025",
+        day: "Thursday",
+        category: "celebrations",
+      },
+      {
+        session: "2025-26",
+        sl: "06",
+        title: "Children's Day",
+        date: "14th November 2025",
+        day: "Friday",
+        category: "celebrations",
+      },
+      {
+        session: "2025-26",
+        sl: "07",
+        title: "Dr. Rajendra Prasad Jayanti",
+        date: "3rd December 2025",
+        day: "Wednesday",
+        category: "celebrations",
+      },
+      {
+        session: "2025-26",
+        sl: "08",
+        title: "Republic Day",
+        date: "26th January 2026",
+        day: "Monday",
+        category: "celebrations",
+      },
+    ],
+    []
+  );
+
+  // 4. Religious & National Holiday Schedule (Extended through April 2027)
+  const allHolidays = useMemo(
+    () => [
+      // 2026-2027 Academic Year (Till April 2027)
+      {
+        session: "2026-27",
+        sl: "01",
+        title: "Ram Navami",
+        date: "17-04-2026",
+        day: "Friday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "02",
+        title: "Mahavir Jayanti",
+        date: "20-04-2026",
+        day: "Monday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "03",
+        title: "Buddha Purnima",
+        date: "01-05-2026",
+        day: "Friday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "04",
+        title: "Eid-Ul-Azha (Bakrid)",
+        date: "27-05-2026",
+        day: "Wednesday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "05",
+        title: "Muharram",
+        date: "26-06-2026",
+        day: "Friday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "06",
+        title: "Raksha Bandhan",
+        date: "28-08-2026",
+        day: "Friday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "07",
+        title: "Janmashtami",
+        date: "04-09-2026",
+        day: "Friday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "08",
+        title: "Milad-un-Nabi (Eid-e-Milad)",
+        date: "15-09-2026",
+        day: "Tuesday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "09",
+        title: "Vishwakarma Puja",
+        date: "17-09-2026",
+        day: "Thursday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "10",
+        title: "Guru Nanak Jayanti",
+        date: "24-11-2026",
+        day: "Tuesday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "11",
+        title: "Christmas Day",
+        date: "25-12-2026",
+        day: "Friday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "12",
+        title: "New Year's Day 2027",
+        date: "01-01-2027",
+        day: "Friday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "13",
+        title: "Makar Sankranti",
+        date: "14-01-2027",
+        day: "Thursday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "14",
+        title: "Guru Gobind Singh Jayanti",
+        date: "15-01-2027",
+        day: "Friday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "15",
+        title: "Vasant Panchami (Saraswati Puja)",
+        date: "11-02-2027",
+        day: "Thursday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "16",
+        title: "Maha Shivratri",
+        date: "06-03-2027",
+        day: "Saturday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "17",
+        title: "Eid-ul-Fitr",
+        date: "10-03-2027",
+        day: "Wednesday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "18",
+        title: "Holi Celebrations",
+        date: "22-03-2027 to 24-03-2027",
+        day: "Mon–Wed",
+        days: "03",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "19",
+        title: "Good Friday",
+        date: "26-03-2027",
+        day: "Friday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "20",
+        title: "Ram Navami 2027",
+        date: "06-04-2027",
+        day: "Tuesday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "21",
+        title: "Ambedkar Jayanti 2027",
+        date: "14-04-2027",
+        day: "Wednesday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2026-27",
+        sl: "22",
+        title: "Mahavir Jayanti 2027",
+        date: "19-04-2027",
+        day: "Monday",
+        days: "01",
+        category: "holidays",
+      },
+
+      // 2025-2026 Academic Year
+      {
+        session: "2025-26",
+        sl: "01",
+        title: "Ram Navami",
+        date: "06-04-2025",
+        day: "Sunday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "02",
+        title: "Eid-Ul-Azha",
+        date: "07-06-2025",
+        day: "Saturday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "03",
+        title: "Muharram",
+        date: "06-07-2025",
+        day: "Sunday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "04",
+        title: "Raksha Bandhan",
+        date: "09-08-2025",
+        day: "Saturday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "05",
+        title: "Janmashtami",
+        date: "16-08-2025",
+        day: "Saturday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "06",
+        title: "Ganesh Chaturthi",
+        date: "28-08-2025",
+        day: "Thursday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "07",
+        title: "Vishwakarma Puja",
+        date: "17-09-2025",
+        day: "Wednesday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "08",
+        title: "Christmas",
+        date: "25-12-2025",
+        day: "Thursday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "09",
+        title: "New Year",
+        date: "31-12-2025 to 01-01-2026",
+        day: "Wed–Thu",
+        days: "02",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "10",
+        title: "Makar Sankranti",
+        date: "14-01-2026",
+        day: "Wednesday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "11",
+        title: "Vasant Panchami",
+        date: "21-01-2026",
+        day: "Wednesday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "12",
+        title: "Maha Shivratri",
+        date: "15-02-2026",
+        day: "Sunday",
+        days: "01",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "13",
+        title: "Holi",
+        date: "04-03-2026 to 06-03-2026",
+        day: "Wed–Fri",
+        days: "03",
+        category: "holidays",
+      },
+      {
+        session: "2025-26",
+        sl: "14",
+        title: "Id-ul-Fiter",
+        date: "21-03-2026",
+        day: "Saturday",
+        days: "01",
+        category: "holidays",
+      },
+    ],
+    []
+  );
+
+  // Filter helper based on session and search
+  const filterList = (items) => {
+    return items.filter((item) => {
+      const matchesSession =
+        selectedSession === "all" || item.session === selectedSession;
+      const matchesSearch =
+        searchQuery.trim() === "" ||
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.date.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.day && item.day.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesSession && matchesSearch;
+    });
+  };
+
+  const currentVacations = useMemo(
+    () => filterList(allVacations),
+    [allVacations, selectedSession, searchQuery]
+  );
+  const currentExams = useMemo(
+    () => filterList(allExams),
+    [allExams, selectedSession, searchQuery]
+  );
+  const currentCelebrations = useMemo(
+    () => filterList(allCelebrations),
+    [allCelebrations, selectedSession, searchQuery]
+  );
+  const currentHolidays = useMemo(
+    () => filterList(allHolidays),
+    [allHolidays, selectedSession, searchQuery]
+  );
+
+  const totalEventCount =
+    currentVacations.length +
+    currentExams.length +
+    currentCelebrations.length +
+    currentHolidays.length;
+
   return (
-    <>
-      <style>{styles.globalReset}</style>
-      <div style={styles.container}>
-        {/* Floating Background Elements */}
-        <div style={styles.floatingElements}>
-          <div
-            style={{
-              ...styles.floatingCircle,
-              width: "100px",
-              height: "100px",
-              top: "10%",
-              left: "5%",
-              animationDelay: "0s",
-            }}
-          />
-          <div
-            style={{
-              ...styles.floatingCircle,
-              width: "150px",
-              height: "150px",
-              top: "40%",
-              right: "10%",
-              animationDelay: "2s",
-            }}
-          />
-          <div
-            style={{
-              ...styles.floatingCircle,
-              width: "80px",
-              height: "80px",
-              top: "70%",
-              left: "80%",
-              animationDelay: "4s",
-            }}
-          />
-          <div
-            style={{
-              ...styles.floatingCircle,
-              width: "120px",
-              height: "120px",
-              top: "80%",
-              left: "20%",
-              animationDelay: "1s",
-            }}
-          />
-        </div>
+    <div className="calendar-page-wrapper">
+      {/* Playful Floating Academic Ambient Icons */}
+      <div className="calendar-ambient-floats" aria-hidden="true">
+        <span className="school-float-icon icon-1">🎓</span>
+        <span className="school-float-icon icon-2">📚</span>
+        <span className="school-float-icon icon-3">✨</span>
+        <span className="school-float-icon icon-4">🏆</span>
+        <span className="school-float-icon icon-5">🎨</span>
+        <span className="school-float-icon icon-6">⚽</span>
+        <span className="school-float-icon icon-7">🌟</span>
+      </div>
 
-        <div style={styles.innerContainer}>
-          <h1 style={styles.mainTitle}>
-            Mount Summer Convent School Calendar 2025-26
-            <div style={styles.titleUnderline}></div>
+      <div className="calendar-main-container">
+        {/* Glossy Hero Card */}
+        <section className="calendar-hero-card">
+          <div className="calendar-top-eyebrow">
+            <span>✨</span> Mount Summer Academic Portal
+          </div>
+          <h1 className="calendar-hero-title">
+            Academic Calendar & <span>Holiday List</span>
           </h1>
+          <p className="calendar-hero-subtitle">
+            Official scholastic schedule, comprehensive term examinations, vacations,
+            and complete holiday list extended up to <strong>April 2027</strong>.
+          </p>
 
-          {/* Vacation Schedule */}
-          {renderTable(
-            vacationData,
-            {
-              title: "Vacation Schedule",
-              category: "Vacation Periods",
-              icon: "🌴",
-              columns: ["Sl. No.", "Holidays", "Date", "Day", "No. of Days"],
-            },
-            styles.vacationBadge,
-            "vacation"
-          )}
+          {/* Next Upcoming Live Banner */}
+          <div className="calendar-next-event-banner">
+            <span className="live-indicator">
+              <span className="live-dot"></span> Next Milestone
+            </span>
+            <span>
+              {selectedSession === "2026-27"
+                ? "Academic Session 2026–27 Openings & Orientation • April 2026"
+                : "Upcoming Periodic Assessments & Foundation Festivities"}
+            </span>
+          </div>
+        </section>
 
-          {/* Examination Dates */}
-          {renderTable(
-            examData,
-            {
-              title: "Tentative Examination Dates",
-              category: "Assessment Schedule",
-              icon: "📝",
-              columns: ["Sl. No.", "Examination", "Date of Examination"],
-            },
-            styles.examBadge,
-            "exams"
-          )}
-
-          {/* School Celebrations */}
-          {renderTable(
-            celebrationData,
-            {
-              title: "School Celebrations",
-              category: "Special Events",
-              icon: "🎉",
-              columns: ["Sl. No.", "Occasion", "Date"],
-            },
-            styles.celebrationBadge,
-            "celebrations"
-          )}
-
-          {/* Holiday Schedule */}
-          <div
-            style={{
-              ...(isMobile ? styles.sectionMobile : styles.section),
-              ...(activeSection === "holidays" ? styles.sectionHover : {}),
-              transform: isVisible.holidays
-                ? "translateY(0)"
-                : "translateY(50px)",
-              opacity: isVisible.holidays ? 1 : 0,
-              transition: "all 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
-            }}
-            onMouseEnter={() => handleSectionHover("holidays", true)}
-            onMouseLeave={() => handleSectionHover("holidays", false)}
-            id="holidays"
-            data-animate
-          >
-            <div style={styles.sectionTopBorder}></div>
-            <div style={styles.sectionTitle}>
-              Holiday Schedule
-              <div style={styles.sectionTitleAfter}></div>
+        {/* Glossy Toolbar: Session Switcher, Category Filters, Search */}
+        <section className="calendar-controls-bar">
+          {/* Academic Session Switcher */}
+          <div className="session-switcher-container">
+            <div className="session-switcher-glass">
+              <button
+                className={`session-tab-btn ${
+                  selectedSession === "2026-27" ? "active" : ""
+                }`}
+                onClick={() => setSelectedSession("2026-27")}
+              >
+                <span>Session 2026–2027</span>
+                <span className="session-extended-tag">Till April 2027</span>
+              </button>
+              <button
+                className={`session-tab-btn ${
+                  selectedSession === "2025-26" ? "active" : ""
+                }`}
+                onClick={() => setSelectedSession("2025-26")}
+              >
+                <span>Session 2025–2026</span>
+              </button>
+              <button
+                className={`session-tab-btn ${
+                  selectedSession === "all" ? "active" : ""
+                }`}
+                onClick={() => setSelectedSession("all")}
+              >
+                <span>All Dates (2025–2027)</span>
+              </button>
             </div>
-            <div
+          </div>
+
+          {/* Filter Tabs and Live Search Box */}
+          <div className="calendar-filter-row">
+            <div className="calendar-category-tabs">
+              <button
+                className={`cat-filter-btn ${
+                  activeCategory === "all" ? "active" : ""
+                }`}
+                onClick={() => setActiveCategory("all")}
+              >
+                <span>All Categories</span>
+                <span className="cat-filter-count">{totalEventCount}</span>
+              </button>
+              <button
+                className={`cat-filter-btn ${
+                  activeCategory === "vacation" ? "active" : ""
+                }`}
+                onClick={() => setActiveCategory("vacation")}
+              >
+                <span>🌴 Vacations</span>
+                <span className="cat-filter-count">
+                  {currentVacations.length}
+                </span>
+              </button>
+              <button
+                className={`cat-filter-btn ${
+                  activeCategory === "exams" ? "active" : ""
+                }`}
+                onClick={() => setActiveCategory("exams")}
+              >
+                <span>📝 Exams</span>
+                <span className="cat-filter-count">{currentExams.length}</span>
+              </button>
+              <button
+                className={`cat-filter-btn ${
+                  activeCategory === "celebrations" ? "active" : ""
+                }`}
+                onClick={() => setActiveCategory("celebrations")}
+              >
+                <span>🎉 Celebrations</span>
+                <span className="cat-filter-count">
+                  {currentCelebrations.length}
+                </span>
+              </button>
+              <button
+                className={`cat-filter-btn ${
+                  activeCategory === "holidays" ? "active" : ""
+                }`}
+                onClick={() => setActiveCategory("holidays")}
+              >
+                <span>🎊 Holidays</span>
+                <span className="cat-filter-count">
+                  {currentHolidays.length}
+                </span>
+              </button>
+            </div>
+
+            {/* Glossy Search Box */}
+            <div className="calendar-search-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search event, holiday or month..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search calendar"
+              />
+              {searchQuery && (
+                <button
+                  className="clear-search"
+                  onClick={() => setSearchQuery("")}
+                  aria-label="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* 1. Vacation Schedule Section */}
+        {(activeCategory === "all" || activeCategory === "vacation") &&
+          currentVacations.length > 0 && (
+            <article className="calendar-section-card">
+              <div className="calendar-card-top-glow"></div>
+              <div className="calendar-section-header">
+                <div className="section-title-wrap">
+                  <h2 className="section-main-title">Vacation Schedule</h2>
+                  <span className="section-period-tag">
+                    {selectedSession === "2026-27"
+                      ? "Academic Year 2026–27 (Till April 2027)"
+                      : selectedSession === "2025-26"
+                      ? "Academic Year 2025–26"
+                      : "Multi-Year Vacation Schedule"}
+                  </span>
+                </div>
+                <div className="calendar-category-badge badge-vacation">
+                  🌴 Vacation Breaks
+                </div>
+              </div>
+
+              {/* Desktop Table */}
+              <div className="calendar-table-responsive">
+                <table className="calendar-glossy-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: "90px" }}>Sl. No.</th>
+                      <th>Holiday Occasion</th>
+                      <th>Date Range</th>
+                      <th>Days of Week</th>
+                      <th style={{ textAlign: "center" }}>Duration</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentVacations.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>
+                          <span className="event-sl-badge">{item.sl}</span>
+                        </td>
+                        <td className="event-title-cell">{item.title}</td>
+                        <td>
+                          <span className="event-date-highlight">
+                            {item.date}
+                          </span>
+                        </td>
+                        <td>{item.day}</td>
+                        <td style={{ textAlign: "center" }}>
+                          <span className="event-days-pill">
+                            ⏳ {item.days} Days
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="calendar-mobile-cards-wrap">
+                {currentVacations.map((item, idx) => (
+                  <div key={idx} className="calendar-mobile-card">
+                    <div className="mob-card-head">
+                      <span className="mob-card-number">{item.sl}</span>
+                      <h3 className="mob-card-title">{item.title}</h3>
+                    </div>
+                    <div className="mob-card-details">
+                      <div className="mob-detail-row">
+                        <span className="mob-detail-label">Dates</span>
+                        <span className="mob-date-val">{item.date}</span>
+                      </div>
+                      <div className="mob-detail-row">
+                        <span className="mob-detail-label">Schedule</span>
+                        <span className="mob-detail-val">{item.day}</span>
+                      </div>
+                      <div className="mob-detail-row">
+                        <span className="mob-detail-label">Duration</span>
+                        <span className="event-days-pill">
+                          {item.days} Days
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+          )}
+
+        {/* 2. Examination Dates Section */}
+        {(activeCategory === "all" || activeCategory === "exams") &&
+          currentExams.length > 0 && (
+            <article className="calendar-section-card">
+              <div className="calendar-card-top-glow"></div>
+              <div className="calendar-section-header">
+                <div className="section-title-wrap">
+                  <h2 className="section-main-title">
+                    Tentative Examination Dates
+                  </h2>
+                  <span className="section-period-tag">
+                    Continuous Comprehensive Evaluation & Board Pattern
+                  </span>
+                </div>
+                <div className="calendar-category-badge badge-exams">
+                  📝 Assessment Schedule
+                </div>
+              </div>
+
+              {/* Desktop Table */}
+              <div className="calendar-table-responsive">
+                <table className="calendar-glossy-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: "90px" }}>Sl. No.</th>
+                      <th>Examination Name</th>
+                      <th>Date of Examination</th>
+                      <th>Days of Week</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentExams.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>
+                          <span className="event-sl-badge">{item.sl}</span>
+                        </td>
+                        <td className="event-title-cell">{item.title}</td>
+                        <td>
+                          <span className="event-date-highlight">
+                            {item.date}
+                          </span>
+                        </td>
+                        <td>{item.day || "Regular School Schedule"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="calendar-mobile-cards-wrap">
+                {currentExams.map((item, idx) => (
+                  <div key={idx} className="calendar-mobile-card">
+                    <div className="mob-card-head">
+                      <span className="mob-card-number">{item.sl}</span>
+                      <h3 className="mob-card-title">{item.title}</h3>
+                    </div>
+                    <div className="mob-card-details">
+                      <div className="mob-detail-row">
+                        <span className="mob-detail-label">Exam Window</span>
+                        <span className="mob-date-val">{item.date}</span>
+                      </div>
+                      {item.day && (
+                        <div className="mob-detail-row">
+                          <span className="mob-detail-label">Day</span>
+                          <span className="mob-detail-val">{item.day}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+          )}
+
+        {/* 3. School Celebrations Section */}
+        {(activeCategory === "all" || activeCategory === "celebrations") &&
+          currentCelebrations.length > 0 && (
+            <article className="calendar-section-card">
+              <div className="calendar-card-top-glow"></div>
+              <div className="calendar-section-header">
+                <div className="section-title-wrap">
+                  <h2 className="section-main-title">School Celebrations</h2>
+                  <span className="section-period-tag">
+                    Cultural Heritage, Patriotism & Student Milestones
+                  </span>
+                </div>
+                <div className="calendar-category-badge badge-celebrations">
+                  🎉 Special Events
+                </div>
+              </div>
+
+              {/* Desktop Table */}
+              <div className="calendar-table-responsive">
+                <table className="calendar-glossy-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: "90px" }}>Sl. No.</th>
+                      <th>Occasion / Commemoration</th>
+                      <th>Celebration Date</th>
+                      <th>Day</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentCelebrations.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>
+                          <span className="event-sl-badge">{item.sl}</span>
+                        </td>
+                        <td className="event-title-cell">{item.title}</td>
+                        <td>
+                          <span className="event-date-highlight">
+                            {item.date}
+                          </span>
+                        </td>
+                        <td>{item.day}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="calendar-mobile-cards-wrap">
+                {currentCelebrations.map((item, idx) => (
+                  <div key={idx} className="calendar-mobile-card">
+                    <div className="mob-card-head">
+                      <span className="mob-card-number">{item.sl}</span>
+                      <h3 className="mob-card-title">{item.title}</h3>
+                    </div>
+                    <div className="mob-card-details">
+                      <div className="mob-detail-row">
+                        <span className="mob-detail-label">Date</span>
+                        <span className="mob-date-val">{item.date}</span>
+                      </div>
+                      <div className="mob-detail-row">
+                        <span className="mob-detail-label">Day</span>
+                        <span className="mob-detail-val">{item.day}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+          )}
+
+        {/* 4. Religious & National Holiday Schedule (Till April 2027) */}
+        {(activeCategory === "all" || activeCategory === "holidays") &&
+          currentHolidays.length > 0 && (
+            <article className="calendar-section-card">
+              <div className="calendar-card-top-glow"></div>
+              <div className="calendar-section-header">
+                <div className="section-title-wrap">
+                  <h2 className="section-main-title">
+                    Holiday Schedule (Through April 2027)
+                  </h2>
+                  <span className="section-period-tag">
+                    Official Gazette Holidays & Observances
+                  </span>
+                </div>
+                <div className="calendar-category-badge badge-holidays">
+                  🎊 Religious & National Holidays
+                </div>
+              </div>
+
+              {/* Desktop Table */}
+              <div className="calendar-table-responsive">
+                <table className="calendar-glossy-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: "90px" }}>Sl. No.</th>
+                      <th>Holiday Occasion</th>
+                      <th>Date</th>
+                      <th>Day</th>
+                      <th style={{ textAlign: "center" }}>No. of Days</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentHolidays.map((item, idx) => (
+                      <tr key={idx}>
+                        <td>
+                          <span className="event-sl-badge">{item.sl}</span>
+                        </td>
+                        <td className="event-title-cell">{item.title}</td>
+                        <td>
+                          <span className="event-date-highlight">
+                            {item.date}
+                          </span>
+                        </td>
+                        <td>{item.day}</td>
+                        <td style={{ textAlign: "center" }}>
+                          <span className="event-days-pill">
+                            {item.days} Day{item.days > 1 ? "s" : ""}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="calendar-mobile-cards-wrap">
+                {currentHolidays.map((item, idx) => (
+                  <div key={idx} className="calendar-mobile-card">
+                    <div className="mob-card-head">
+                      <span className="mob-card-number">{item.sl}</span>
+                      <h3 className="mob-card-title">{item.title}</h3>
+                    </div>
+                    <div className="mob-card-details">
+                      <div className="mob-detail-row">
+                        <span className="mob-detail-label">Date</span>
+                        <span className="mob-date-val">{item.date}</span>
+                      </div>
+                      <div className="mob-detail-row">
+                        <span className="mob-detail-label">Day</span>
+                        <span className="mob-detail-val">{item.day}</span>
+                      </div>
+                      <div className="mob-detail-row">
+                        <span className="mob-detail-label">Duration</span>
+                        <span className="event-days-pill">
+                          {item.days} Day{item.days > 1 ? "s" : ""}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Important Guidelines Notice */}
+              <div className="calendar-guidelines-box">
+                <div className="guidelines-title">
+                  <span>ℹ️</span> Important School Calendar Guidelines
+                </div>
+                <ul className="guidelines-list">
+                  <li>
+                    Dates for religious festivals such as Eid, Muharram, and Chhath
+                    are subject to the sighting of the moon and Bihar State Government notifications.
+                  </li>
+                  <li>
+                    All National Days and Jayanti celebrations (Gandhi Jayanti, Ambedkar
+                    Jayanti, Republic Day, Independence Day) are celebrated on campus with full student participation.
+                  </li>
+                  <li>
+                    Summer and Winter break durations are subject to prevailing weather and administrative directives from the district administration of Darbhanga.
+                  </li>
+                </ul>
+              </div>
+            </article>
+          )}
+
+        {/* Empty State when search has no matches */}
+        {totalEventCount === 0 && (
+          <div className="calendar-section-card" style={{ textAlign: "center", padding: "4rem 2rem" }}>
+            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📅</div>
+            <h3 style={{ fontSize: "1.4rem", color: "#0f172a", marginBottom: "0.5rem" }}>
+              No calendar events found matching "{searchQuery}"
+            </h3>
+            <p style={{ color: "#64748b", marginBottom: "1.5rem" }}>
+              Try searching with another keyword or reset the session filter.
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setActiveCategory("all");
+              }}
               style={{
-                ...(isMobile
-                  ? styles.categoryBadgeMobile
-                  : styles.categoryBadge),
-                ...styles.holidayBadge,
+                background: "#1e40af",
+                color: "#fff",
+                border: "none",
+                padding: "0.65rem 1.8rem",
+                borderRadius: "9999px",
+                fontWeight: "700",
+                cursor: "pointer",
               }}
             >
-              🎊 Religious & National Holidays
-            </div>
-
-            {/* Desktop Table */}
-            <div className="mobile-hidden">
-              <table style={styles.table}>
-                <thead style={styles.tableHeader}>
-                  <tr>
-                    {["Sl. No.", "Holidays", "Date", "Day", "No. of Days"].map(
-                      (header, index) => (
-                        <th key={index} style={styles.th}>
-                          {header}
-                        </th>
-                      )
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {holidayData.map((row, rowIndex) => (
-                    <tr
-                      key={rowIndex}
-                      style={styles.tableRow}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background =
-                          styles.tableRowHover.background;
-                        e.currentTarget.style.transform =
-                          styles.tableRowHover.transform;
-                        e.currentTarget.style.boxShadow =
-                          styles.tableRowHover.boxShadow;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "transparent";
-                        e.currentTarget.style.transform = "scale(1)";
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
-                    >
-                      {row.map((cell, cellIndex) => (
-                        <td key={cellIndex} style={styles.td}>
-                          {cellIndex === 0 ? (
-                            <div style={styles.serialNumber}>{cell}</div>
-                          ) : cellIndex === 2 ? (
-                            <span style={styles.importantDate}>{cell}</span>
-                          ) : (
-                            cell
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile Cards */}
-            <div className="mobile-visible">
-              <div style={styles.mobileCardsContainer}>
-                {holidayData.map((row, rowIndex) =>
-                  renderMobileCard(
-                    row,
-                    {
-                      title: "Holiday Schedule",
-                      category: "Religious & National Holidays",
-                      icon: "🎊",
-                    },
-                    "holidays",
-                    rowIndex
-                  )
-                )}
-              </div>
-            </div>
-
-            <div style={isMobile ? styles.notesMobile : styles.notes}>
-              <div style={styles.notesIcon}>ℹ️</div>
-              <p
-                style={
-                  isMobile ? styles.notesParagraphMobile : styles.notesParagraph
-                }
-              >
-                * Dates may change due to unforeseen circumstances, moon
-                visibility, etc.
-              </p>
-              <p
-                style={
-                  isMobile ? styles.notesParagraphMobile : styles.notesParagraph
-                }
-              >
-                * All Jayanti celebrations will take place in school; no
-                holidays.
-              </p>
-              <p
-                style={
-                  isMobile ? styles.notesParagraphMobile : styles.notesParagraph
-                }
-              >
-                * Summer Vacation dates may change based on weather conditions.
-              </p>
-            </div>
+              Reset Filters
+            </button>
           </div>
+        )}
 
-          {/* Session Year Footer */}
-          <div style={isMobile ? styles.sessionYearMobile : styles.sessionYear}>
-            <div style={styles.sessionYearBg}></div>
-            <div style={{ position: "relative", zIndex: 1 }}>
-              Academic Session 2025–26
-            </div>
-          </div>
-        </div>
+        {/* Session Footer Summary */}
+        <footer className="calendar-session-footer">
+          <h3>Mount Summer Convent School • Darbhanga</h3>
+          <p>
+            Polo Field Road, K.M. Tank, Laheriasarai, Darbhanga – 846001 • Academic
+            Session 2025–2026 & 2026–2027 Extended Calendar
+          </p>
+        </footer>
       </div>
-    </>
+    </div>
   );
 };
 
